@@ -31,22 +31,16 @@ namespace MyEngine
 			while (m_frame());
 	}
 
-	bool Engine::Init()
+	bool Engine::Init(const FrameworkDesc& desc)
 	{
+		m_render = desc.render;
+
 		m_wnd = new Window();
 		m_input = new InputMgr();
 
-		if (!m_wnd || !m_input)
-		{
-			Log::Get()->Error("Не удалось выделить память");
-			return false;
-		}
-
 		m_input->Init();
 
-		// Создаем значения настроек по умолчанию. В одном из будущих уроков мы вернемся к этому
-		DescWindow desc;
-		if (!m_wnd->Create(desc))
+		if (!m_wnd->Create(desc.wnd))
 		{
 			Log::Get()->Error("Не удалось создать окно");
 			return false;
@@ -78,7 +72,6 @@ namespace MyEngine
 		// если окно изменило размер
 		if (m_wnd->IsResize())
 		{
-
 		}
 
 		m_render->BeginFrame();
