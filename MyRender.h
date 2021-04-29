@@ -4,7 +4,7 @@
 #include <xnamath.h>
 
 using namespace MyEngine;
-
+class StaticMesh;
 class MyRender : public Render
 {
 public:
@@ -24,16 +24,10 @@ public:
 	}
 
 private:
-	ID3D11Buffer* m_pVertexBuffer;
-	ID3D11InputLayout* m_pVertexLayout;
-	ID3D11VertexShader* m_pVertexShader;
-	ID3D11PixelShader* m_pPixelShader;
-	ID3D11PixelShader* m_pPixelShaderSolid;
+	friend StaticMesh;
 
-	ID3D11Buffer* m_pIndexBuffer;
-	ID3D11Buffer* m_pConstantBuffer;
+	StaticMesh* m_mesh;
 
-	XMMATRIX m_World;
 	XMMATRIX m_View;
 	XMMATRIX m_Projection;
 };

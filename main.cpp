@@ -19,5 +19,6 @@ int main(int argc, char** argv)
 	engine.Run();
 
 	engine.Close();
+	system("pause");
 	return 0;
 }
