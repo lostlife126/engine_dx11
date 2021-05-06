@@ -10,7 +10,7 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-
+#include <xnamath.h>
 namespace MyEngine
 {
 	//------------------------------------------------------------------
@@ -107,4 +107,77 @@ private:
 
 //------------------------------------------------------------------
 
+class MyInputCamera : public InputListener
+{
+public:
+
+	XMMATRIX* pView;
+
+	void setView(XMMATRIX* pview)
+	{
+		pView = pview;
+	}
+
+	bool KeyPressed(const KeyEvent& arg)
+	{
+		printf("key press %c\n", arg.wc);
+		if (arg.wc == 'e')
+			//	printf("BOOOW\n");
+		{
+			XMMATRIX mSpin = XMMatrixRotationY(-0.1);
+			(*pView) = (*pView) * mSpin;
+			
+		}
+		if (arg.wc == 'q')
+			//	printf("BOOOW\n");
+		{
+			XMMATRIX mSpin = XMMatrixRotationY(0.1);
+			(*pView) = (*pView) * mSpin;
+		}
+		if (arg.wc == 'w')
+			//	printf("BOOOW\n");
+		{
+			XMMATRIX mTranslate = XMMatrixTranslation(0.0f, 0.0f, -0.1f );
+			(*pView) = (*pView) * mTranslate;
+
+		}
+		if (arg.wc == 's')
+			//	printf("BOOOW\n");
+		{
+			XMMATRIX mTranslate = XMMatrixTranslation(0.0f, 0.0f, 0.1f );
+			(*pView) = (*pView) * mTranslate;
+		}
+		if (arg.wc == 'a')
+			//	printf("BOOOW\n");
+		{
+			XMMATRIX mTranslate = XMMatrixTranslation(0.1f, 0.0f, 0.0f);
+			(*pView) = (*pView) * mTranslate;
+
+		}
+		if (arg.wc == 'd')
+			//	printf("BOOOW\n");
+		{
+			XMMATRIX mTranslate = XMMatrixTranslation(-0.1f, 0.0f, 0.0f);
+			(*pView) = (*pView) * mTranslate;
+		}
+		return false;
+	}
+	bool MouseMove(const MouseEvent& arg)
+	{
+		printf("mouse %d - %d\n", arg.x, arg.y);
+	//	arg.x = 320;
+	//	arg.y = 240;
+		return false;
+	}
+
+	bool MouseWheel(const MouseEventWheel& arg)
+	{
+		XMMATRIX mTranslate = XMMatrixTranslation(0.0f, 0.0f, 0.1f * arg.wheel);
+		(*pView) = (*pView) * mTranslate;
+		return false;
+	}
+};
+
+
 }
+

@@ -125,9 +125,9 @@ namespace MyEngine
 
 	void InputMgr::m_mousewheel(short Value)
 	{
-		if (m_MouseWheel == Value)
-			return;
-
+	//	if (m_MouseWheel == Value)
+	//		return;
+		
 		m_MouseWheel = Value;
 
 		for (auto it = m_Listener.begin(); it != m_Listener.end(); ++it)

@@ -23,6 +23,11 @@ public:
 		_aligned_free(p);
 	}
 
+	XMMATRIX* getCamera()
+	{
+		return &m_View;
+	}
+
 private:
 	friend StaticMesh;
 
