@@ -7,6 +7,7 @@
 
 
 using namespace std;
+using namespace MyEngine;
 
 struct Vertex
 {
@@ -38,10 +39,10 @@ StaticMesh::StaticMesh()
 	m_pConstantBuffer = nullptr;
 	m_sampleState = nullptr;
 	m_texture = nullptr;
-	m_rot = 0.0f;
+	Identity();
 }
 
-bool StaticMesh::Init(MyRender* render, const wchar_t* name)
+bool StaticMesh::Init(Render* render, const wchar_t* name)
 {
 	m_objMatrix = XMMatrixIdentity();
 	m_render = render;
@@ -269,14 +270,10 @@ bool StaticMesh::m_InitShader(const wchar_t* vsFilename, const wchar_t* psFilena
 	return true;
 }
 
-void StaticMesh::Render()
+void StaticMesh::Draw(CXMMATRIX viewmatrix)
 {
-	m_rot += .0005f;
-	if (m_rot > 6.26f)
-		m_rot = 0.0f;
-
 	m_RenderBuffers();
-	m_SetShaderParameters();
+	m_SetShaderParameters(viewmatrix);
 	m_RenderShader();
 }
 
@@ -289,13 +286,9 @@ void StaticMesh::m_RenderBuffers()
 	m_render->m_pImmediateContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
-void StaticMesh::m_SetShaderParameters()
+void StaticMesh::m_SetShaderParameters(CXMMATRIX viewmatrix)
 {
-	XMVECTOR rotaxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	XMMATRIX Rotation = XMMatrixRotationAxis(rotaxis, m_rot);
-	m_objMatrix = Rotation;
-
-	XMMATRIX WVP = m_objMatrix * m_render->m_View * m_render->m_Projection;
+	XMMATRIX WVP = m_objMatrix * viewmatrix * m_render->m_Projection;
 	ConstantBuffer cb;
 	cb.WVP = XMMatrixTranspose(WVP);
 	m_render->m_pImmediateContext->UpdateSubresource(m_pConstantBuffer, 0, NULL, &cb, 0, 0);
@@ -324,4 +317,23 @@ void StaticMesh::Close()
 	_RELEASE(m_layout);
 	_RELEASE(m_pixelShader);
 	_RELEASE(m_vertexShader);
+}
+
+void StaticMesh::Translate(float x, float y, float z)
+{
+	m_objMatrix *= XMMatrixTranslation(x, y, z);
+}
+void StaticMesh::Rotate(float angle, float x, float y, float z)
+{
+	XMVECTOR v = XMVectorSet(x, y, z, 0.0f);
+	m_objMatrix *= XMMatrixRotationAxis(v, angle);
+}
+void StaticMesh::Scale(float x, float y, float z)
+{
+	m_objMatrix *= XMMatrixScaling(x, y, z);
+}
+
+void StaticMesh::Identity()
+{
+	m_objMatrix = XMMatrixIdentity();
 }

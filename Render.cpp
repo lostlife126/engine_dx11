@@ -1,4 +1,5 @@
 #include "Render.h"
+#include "StaticMesh.h"
 
 namespace MyEngine
 {
@@ -15,6 +16,8 @@ namespace MyEngine
 		m_pRenderTargetView = nullptr;
 		m_pDepthStencil = nullptr;
 		m_pDepthStencilView = nullptr;
+		m_pDepthStencilState = nullptr;
+		m_pDepthDisabledStencilState = nullptr;
 	}
 
 	HRESULT Render::m_compileshaderfromfile(const wchar_t* FileName, LPCSTR EntryPoint, LPCSTR ShaderModel, ID3DBlob** ppBlobOut)
@@ -122,6 +125,31 @@ namespace MyEngine
 		if (FAILED(hr))
 			return false;
 
+		D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+		ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+		depthStencilDesc.DepthEnable = true;
+		depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+		depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+		depthStencilDesc.StencilEnable = true;
+		depthStencilDesc.StencilReadMask = 0xFF;
+		depthStencilDesc.StencilWriteMask = 0xFF;
+		depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+		depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+		depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+		depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+		depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+		hr = m_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &m_pDepthStencilState);
+		if (FAILED(hr))
+			return false;
+
+		depthStencilDesc.DepthEnable = false;
+		hr = m_pd3dDevice->CreateDepthStencilState(&depthStencilDesc, &m_pDepthDisabledStencilState);
+		if (FAILED(hr))
+			return false;
+
 		D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
 		ZeroMemory(&descDSV, sizeof(descDSV));
 		descDSV.Format = descDepth.Format;
@@ -142,11 +170,14 @@ namespace MyEngine
 		vp.TopLeftY = 0;
 		m_pImmediateContext->RSSetViewports(1, &vp);
 
+		m_Projection = XMMatrixPerspectiveFovLH(0.4f * 3.14f, (float)width / height, 1.0f, 1000.0f);
+
 		return Init(hwnd);
 	}
 
 	void Render::BeginFrame()
 	{
+		TurnZBufferOn();
 		float ClearColor[4] = { 0.0f, 0.125f, 0.3f, 1.0f };
 		m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView, ClearColor);
 		m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0);
@@ -166,10 +197,22 @@ namespace MyEngine
 
 		_RELEASE(m_pDepthStencil);
 		_RELEASE(m_pDepthStencilView);
+		_RELEASE(m_pDepthStencilState);
+		_RELEASE(m_pDepthDisabledStencilState);
 		_RELEASE(m_pRenderTargetView);
 		_RELEASE(m_pSwapChain);
 		_RELEASE(m_pImmediateContext);
 		_RELEASE(m_pd3dDevice);
+	}
+
+	void Render::TurnZBufferOn()
+	{
+		m_pImmediateContext->OMSetDepthStencilState(m_pDepthStencilState, 1);
+	}
+
+	void Render::TurnZBufferOff()
+	{
+		m_pImmediateContext->OMSetDepthStencilState(m_pDepthDisabledStencilState, 1);
 	}
 
 

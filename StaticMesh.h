@@ -1,36 +1,53 @@
 #pragma once
-#include "MyRender.h"
+#include "Render.h"
 
-class StaticMesh
+namespace MyEngine
 {
-public:
-	StaticMesh();
+	class StaticMesh
+	{
+	public:
+		StaticMesh();
 
-	bool Init(MyRender* render, const wchar_t* name);
-	void Render();
-	void Close();
+		bool Init(Render* render, const wchar_t* name);
+		void Draw(CXMMATRIX viewmatrix);
+		void Close();
 
-private:
-	bool m_loadMS3DFile(const wchar_t* name);
-	bool m_LoadTextures(const wchar_t* name);
-	bool m_InitShader(const wchar_t* namevs, const wchar_t* nameps);
+		void Translate(float x, float y, float z);
+		void Rotate(float angle, float x, float y, float z);
+		void Scale(float x, float y, float z);
+		void Identity();
 
-	void m_RenderBuffers();
-	void m_SetShaderParameters();
-	void m_RenderShader();
+		void* operator new(size_t i)
+		{
+			return _aligned_malloc(i, 16);
+		}
 
-	MyRender* m_render;
+		void operator delete(void* p)
+		{
+			_aligned_free(p);
+		}
 
-	ID3D11Buffer* m_vertexBuffer;
-	ID3D11Buffer* m_indexBuffer;
-	ID3D11VertexShader* m_vertexShader;
-	ID3D11PixelShader* m_pixelShader;
-	ID3D11InputLayout* m_layout;
-	ID3D11Buffer* m_pConstantBuffer;
-	ID3D11SamplerState* m_sampleState;
-	ID3D11ShaderResourceView* m_texture;
+	private:
+		bool m_loadMS3DFile(const wchar_t* name);
+		bool m_LoadTextures(const wchar_t* name);
+		bool m_InitShader(const wchar_t* namevs, const wchar_t* nameps);
 
-	XMMATRIX m_objMatrix;
-	unsigned short m_indexCount;
-	float m_rot;
-};
+		void m_RenderBuffers();
+		void m_SetShaderParameters(CXMMATRIX viewmatrix);
+		void m_RenderShader();
+
+		Render* m_render;
+
+		ID3D11Buffer* m_vertexBuffer;
+		ID3D11Buffer* m_indexBuffer;
+		ID3D11VertexShader* m_vertexShader;
+		ID3D11PixelShader* m_pixelShader;
+		ID3D11InputLayout* m_layout;
+		ID3D11Buffer* m_pConstantBuffer;
+		ID3D11SamplerState* m_sampleState;
+		ID3D11ShaderResourceView* m_texture;
+
+		XMMATRIX m_objMatrix;
+		unsigned short m_indexCount;
+	};
+}

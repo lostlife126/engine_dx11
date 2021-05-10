@@ -44,7 +44,20 @@ bool MyRender::Init(HWND hwnd)
 
 bool MyRender::Draw()
 {
-	m_mesh->Render();
+	static float rot = 0.0f;
+	rot += .0005f;
+	if (rot > 6.26f)
+		rot = 0.0f;
+
+	m_mesh->Identity();
+	m_mesh->Rotate(-rot, 0.0, 1.0, 0.0);
+	m_mesh->Translate(-1.5, 0.0, 0.0);
+	m_mesh->Draw(m_View);
+
+	m_mesh->Identity();
+	m_mesh->Rotate(rot, 0.0, 1.0, 0.0);
+	m_mesh->Translate(1.5, 0.0, 0.0);
+	m_mesh->Draw(m_View);
 	return true;
 }
 
