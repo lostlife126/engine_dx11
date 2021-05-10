@@ -21,6 +21,7 @@ public:
 private:
 
 	StaticMesh* m_mesh;
-
 	XMMATRIX m_View;
+	ID3D11RasterizerState* WireFrame;
+	ID3D11RasterizerState* Solid;
 };
